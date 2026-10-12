@@ -1,0 +1,26 @@
+## Interface: 16001
+## Title: Shardmates
+## Notes: Finds players on your quests nearby and groups you up without throwing anyone into another layer.
+## Notes-ruRU: Находит игроков на тех же заданиях рядом и собирает группу так, чтобы никого не перебросило в чужой слой.
+## Author: MRAktiv
+## Version: 1.0.0
+## IconTexture: Interface\Icons\INV_Misc_GroupNeedMore
+## Category-enUS: Quests
+## Category-ruRU: Задания
+## SavedVariables: ShardmatesDB
+
+embeds.xml
+
+Locales\enUS.lua
+Locales\ruRU.lua
+
+Logic.lua
+Init.lua
+Layer.lua
+Quests.lua
+Net.lua
+Tagging.lua
+UI.lua
+Options.lua
+Diag.lua
+Core.lua
