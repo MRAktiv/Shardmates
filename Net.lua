@@ -147,7 +147,7 @@ function Net:BuildMe()
 	local mode = ns.db.profile.mode
 	return {
 		id = ns.MyID(),
-		faction = UnitFactionGroup("player") == "Horde" and "H" or "A",
+		faction = ns.Faction(),
 		mapID = ns.Quests.mapID,
 		layer = ns.Layer:Current(),
 		level = UnitLevel("player"),
@@ -227,7 +227,7 @@ function Net:OnComm(_, text, distribution, sender)
 	local head = text:sub(1, 1)
 	if head == "P" then
 		local peer = Logic.DecodePresence(text)
-		if not peer or peer.id == ns.MyID() then
+		if not peer or peer.id == ns.MyID() or peer.faction ~= ns.Faction() then
 			return
 		end
 		peer.name, peer.seen = sender, GetTime()

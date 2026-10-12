@@ -61,6 +61,11 @@ function ns.MyID()
 	return ""
 end
 
+-- "A" or "H": players of the other faction cannot group with us and are never listed.
+function ns.Faction()
+	return UnitFactionGroup("player") == "Horde" and "H" or "A"
+end
+
 function ns.InInstance()
 	local inInstance = IsInInstance()
 	return inInstance and true or false

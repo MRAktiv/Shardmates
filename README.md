@@ -30,6 +30,7 @@ Shardmates exchanges data with other copies of the addon through a hidden chat c
 
 - **Presence**, every 90 seconds and whenever your quests, layer or group change: faction, zone, layer, level, class, group status, mode, your unfinished quests in the zone with their objective types, and a short character ID used to match invites. If you have no matching quests in the zone, nothing is sent.
 - **Group requests and answers** go by whisper to one player only.
+- Players of the other faction are never listed: their messages are dropped.
 - Nothing is sent inside dungeons, and the Off mode stops all sharing.
 - Only your settings are saved to disk. Nearby players are kept in memory and forgotten after four minutes without news.
 
@@ -57,7 +58,7 @@ Shardmates помогает выполнять задания вместе с д
 
 **Команды:** `/shardmates` или `/smates` открывает окно, кнопка у миникарты делает то же, а правый щелчок по ней открывает настройки, `/shardmates mode ask|auto|off` меняет режим, `/shardmates diag` открывает отчёт для сообщения об ошибке.
 
-**Что передаётся.** Обмен идёт через скрытый канал чата вашей зоны, без внешних серверов. Раз в 90 секунд и при смене заданий, слоя или группы уходят фракция, зона, слой, уровень, класс, состояние группы, режим, невыполненные задания зоны с типами целей и короткий номер персонажа для сверки приглашений. Если подходящих заданий в зоне нет, не уходит ничего. Запросы и ответы идут шёпотом одному игроку. В подземельях аддон молчит. На диск пишутся только настройки, а игроки рядом хранятся в памяти и забываются через четыре минуты тишины.
+**Что передаётся.** Обмен идёт через скрытый канал чата вашей зоны, без внешних серверов. Раз в 90 секунд и при смене заданий, слоя или группы уходят фракция, зона, слой, уровень, класс, состояние группы, режим, невыполненные задания зоны с типами целей и короткий номер персонажа для сверки приглашений. Если подходящих заданий в зоне нет, не уходит ничего. Запросы и ответы идут шёпотом одному игроку. Игроков другой фракции аддон не показывает: их сообщения отбрасываются. В подземельях аддон молчит. На диск пишутся только настройки, а игроки рядом хранятся в памяти и забываются через четыре минуты тишины.
 
 **Полезно знать:** слой определяется, когда аддон увидит двух разных NPC (полоски над головой, цель или курсор). Найти можно только игроков, у которых стоит Shardmates. Языки: русский и английский.
 
