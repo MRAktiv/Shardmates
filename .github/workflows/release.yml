@@ -1,0 +1,95 @@
+name: Release
+
+# По пушу тега вида vX.Y.Z: собрать ZIP аддона, создать GitHub Release и загрузить на CurseForge.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+env:
+  ADDON: Shardmates
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build addon zip
+        id: build
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          zip="${ADDON}-${version}.zip"
+          # файлы аддона лежат в корне репозитория: в архив они идут папкой аддона, без README, LICENSE, CHANGELOG и CI
+          git archive --format=zip --prefix="${ADDON}/" -o "$zip" HEAD -- . \
+            ':(exclude).github' ':(exclude).gitignore' ':(exclude)README.md' ':(exclude)LICENSE' ':(exclude)CHANGELOG.md'
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "zip=$zip" >> "$GITHUB_OUTPUT"
+
+      - name: Extract release notes for this version
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v v="## $version" '
+            $0 == v { grab = 1; next }
+            /^## / && grab { exit }
+            grab { print }
+          ' CHANGELOG.md > release-notes.md
+          if [ ! -s release-notes.md ]; then echo "Подробности в CHANGELOG.md" > release-notes.md; fi
+
+      - name: Create or update GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "${{ steps.build.outputs.zip }}" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "${{ steps.build.outputs.zip }}" \
+              --title "${ADDON} ${{ steps.build.outputs.version }}" \
+              --notes-file release-notes.md
+          fi
+
+      - name: Upload to CurseForge
+        env:
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          CF_PROJECT_ID: ${{ secrets.CF_PROJECT_ID }}
+          ZIP: ${{ steps.build.outputs.zip }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CF_API_KEY:-}" ] || [ -z "${CF_PROJECT_ID:-}" ]; then
+            echo "Секреты CF_API_KEY / CF_PROJECT_ID не заданы — пропускаю загрузку на CurseForge."
+            exit 0
+          fi
+
+          # id версий игры: из номеров "## Interface" в Shardmates.toc (16001 -> 1.60.1).
+          # Если точной версии на CurseForge ещё нет, берётся старшая в той же ветке (1.60.x).
+          curl -sf -H "X-Api-Token: $CF_API_KEY" https://wow.curseforge.com/api/game/versions > cf-versions.json
+          gv_ids="$(python3 - <<'PY'
+          import json, os, re, sys
+          toc = open(os.environ["ADDON"] + ".toc", encoding="utf-8-sig").read()
+          interfaces = [int(x) for x in re.search(r"^## Interface:(.+)$", toc, re.M).group(1).split(",")]
+          versions = [v for v in json.load(open("cf-versions.json")) if re.fullmatch(r"\d+\.\d+\.\d+", v["name"])]
+          ids = []
+          for interface in interfaces:
+              name = "%d.%d.%d" % (interface // 10000, interface // 100 % 100, interface % 100)
+              branch = [v for v in versions if v["name"].rsplit(".", 1)[0] == name.rsplit(".", 1)[0]]
+              if not branch:
+                  sys.exit("CurseForge: нет версий ветки %s" % name)
+              exact = [v for v in branch if v["name"] == name]
+              pick = exact[0] if exact else max(branch, key=lambda v: [int(p) for p in v["name"].split(".")])
+              print("Interface %d -> CurseForge %s (id %d)" % (interface, pick["name"], pick["id"]), file=sys.stderr)
+              ids.append(pick["id"])
+          print(",".join(str(i) for i in ids))
+          PY
+          )"
+
+          metadata="$(GV="$gv_ids" python3 -c "import json,os; print(json.dumps({'changelog': open('release-notes.md', encoding='utf-8').read(), 'changelogType': 'markdown', 'releaseType': 'release', 'gameVersions': [int(i) for i in os.environ['GV'].split(',')]}))")"
+
+          curl -sf -X POST "https://wow.curseforge.com/api/projects/${CF_PROJECT_ID}/upload-file" \
+            -H "X-Api-Token: $CF_API_KEY" \
+            -F "metadata=$metadata" \
+            -F "file=@${ZIP}"
+          echo "Загружено на CurseForge."

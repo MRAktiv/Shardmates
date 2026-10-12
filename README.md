@@ -1,5 +1,7 @@
 # Shardmates
 
+Download: [CurseForge](https://www.curseforge.com/wow/addons/shardmates)
+
 Shardmates helps you quest together with other players in WoW Forever without getting thrown into another layer.
 
 A quest mob in Forever counts only for the player who tagged it, and joining a stranger's group moves you into the leader's layer, where the mobs you just cleared are alive again. Shardmates finds nearby players who use the addon and share your unfinished quests, shows whether grouping up actually helps, and arranges the invite so that the right person moves.
@@ -41,6 +43,8 @@ Shardmates exchanges data with other copies of the addon through a hidden chat c
 - Languages: English and Russian.
 
 ## На русском
+
+Скачать: [CurseForge](https://www.curseforge.com/wow/addons/shardmates)
 
 Shardmates помогает выполнять задания вместе с другими игроками в WoW Forever так, чтобы никого не перебросило в чужой слой.
 
